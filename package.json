@@ -25,6 +25,7 @@
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "express": "^4.19.1",
-    "http-status": "^1.7.4"
+    "http-status": "^1.7.4",
+    "zod": "^3.22.4"
   }
 }
