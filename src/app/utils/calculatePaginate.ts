@@ -1,9 +1,4 @@
-type TCalculatePagination = {
-  page?: string;
-  limit?: string;
-  sortBy?: string;
-  sortOrder?: string;
-};
+import { TPagination } from "../types/pagination";
 
 type TCalculatePaginationResult = {
   page: number;
@@ -14,7 +9,7 @@ type TCalculatePaginationResult = {
 };
 
 const calculatePagination = (
-  options: TCalculatePagination
+  options: TPagination
 ): TCalculatePaginationResult => {
   const page: number = Number(options.page) || 1;
   const limit: number = Number(options.limit) || 10;
