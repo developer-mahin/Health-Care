@@ -3,6 +3,7 @@ import catchAsync from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { AuthService } from "./auth.service";
 import Config from "../../config";
+import AppError from "../../errors/AppError";
 
 const loginUser = catchAsync(async (req, res) => {
   const { accessToken, needPasswordChange, refreshToken } =
@@ -32,12 +33,52 @@ const refreshToken = catchAsync(async (req, res) => {
   sendResponse(res, {
     status: httpStatus.OK,
     success: true,
-    message: "Logged in successful",
+    message: "access token generate successfully",
     data: result,
+  });
+});
+
+const changePassword = catchAsync(async (req, res) => {
+  const user = req.user;
+  await AuthService.changePassword(user, req.body);
+
+  sendResponse(res, {
+    status: httpStatus.OK,
+    success: true,
+    message: "Password change successfully",
+  });
+});
+
+const forgotPassword = catchAsync(async (req, res) => {
+  const result = await AuthService.forgotPassword(req.body);
+
+  sendResponse(res, {
+    status: httpStatus.OK,
+    success: true,
+    message: "Check your mail and update your password",
+    data: result,
+  });
+});
+
+const resetPassword = catchAsync(async (req, res) => {
+  const token = req.headers.authorization;
+  if (!token) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Your are not authorized");
+  }
+
+  await AuthService.resetPassword(token, req.body);
+
+  sendResponse(res, {
+    status: httpStatus.OK,
+    success: true,
+    message: "Check your mail and update your password",
   });
 });
 
 export const AuthController = {
   loginUser,
   refreshToken,
+  changePassword,
+  forgotPassword,
+  resetPassword,
 };

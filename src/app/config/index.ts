@@ -11,4 +11,9 @@ export default {
   access_expires_in: process.env.JWT_ACCESS_EXPIRES_IN,
   refresh_secret: process.env.JWT_REFRESH_SECRET,
   refresh_expires_in: process.env.JWT_REFRESH_EXPIRES_IN,
+  reset_pass_secret: process.env.RESET_PASS_SECRET,
+  reset_pass_expires_in: process.env.RESET_PASS_EXPIRES_IN,
+  front_end_url: process.env.FRONT_END_URL,
+  smtp_email: process.env.SMTP_EMAIL,
+  smtp_pass: process.env.SMTP_PASS,
 };
