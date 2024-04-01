@@ -4,11 +4,12 @@ import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
 
 const createAdmin = async (req: Request, res: Response, next: NextFunction) => {
-  const result = await userServices.createAdminIntoDB(req.body);
+  const result = await userServices.createAdminIntoDB(req.file, req.body);
+
   sendResponse(res, {
     status: httpStatus.CREATED,
     success: true,
-    message: "successfully admin created ",
+    message: "successfully admin created",
     data: result,
   });
 };
