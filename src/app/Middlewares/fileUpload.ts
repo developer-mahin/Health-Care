@@ -2,7 +2,7 @@ import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import path from "path";
 import fs from "fs";
-import { ICloudinaryResponse, IFile } from "../interface/file";
+import { ICloudinaryResponse } from "../interface/file";
 import config from "../config";
 
 cloudinary.config({
@@ -13,21 +13,17 @@ cloudinary.config({
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(process.cwd(), "/uploads"));
+    cb(null, "uploads/");
   },
-
   filename: function (req, file, cb) {
-    cb(
-      null,
-      Date.now() + "-" + Math.round(Math.random() * 1e9) + file.originalname
-    );
+    cb(null, file.originalname);
   },
 });
 
 const upload = multer({ storage: storage });
 
 const uploadIntoCloudinary = async (
-  file: IFile
+  file: any
 ): Promise<ICloudinaryResponse | undefined> => {
   return new Promise((resolve, reject) => {
     cloudinary.uploader.upload(
@@ -35,7 +31,7 @@ const uploadIntoCloudinary = async (
       (error: Error, result: ICloudinaryResponse) => {
         fs.unlinkSync(file.path);
         if (error) {
-          reject();
+          reject(error);
         } else {
           resolve(result);
         }

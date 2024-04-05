@@ -7,10 +7,12 @@ import cookieParse from "cookie-parser";
 
 const app: Application = express();
 
-app.use(cors());
-app.use(cookieParse());
 app.use(express.json());
+app.use(cookieParse());
+app.use(cors());
 app.use(express.urlencoded({ extended: true }));
+
+app.use("/api/v1", router);
 
 app.get("/", (req: Request, res: Response) => {
   res.json({
@@ -18,9 +20,7 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 
-app.use("/api/v1", router);
-
-app.use(globalErrorHandler);
 app.use(notFound);
+app.use(globalErrorHandler);
 
 export default app;

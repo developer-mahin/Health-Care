@@ -1,48 +1,58 @@
 import { UserRole } from "@prisma/client";
-import bcrypt from "bcryptjs";
-import prisma from "../../utils/prisma";
-import AppError from "../../errors/AppError";
-import httpStatus from "http-status";
+import { Request } from "express";
 import { fileUpload } from "../../Middlewares/fileUpload";
+import { hashedPassword } from "../../utils/hashedPassword";
+import prisma from "../../utils/prisma";
 
-const createAdminIntoDB = async (file: any, data: any) => {
-  const isExist = await prisma.user.findFirst({
-    where: {
-      email: data.admin.email,
-    },
-  });
+const createAdminIntoDB = async (req: Request) => {
+  const file = req.file;
 
-  if (isExist) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "Already an user has in this email"
-    );
+  if (file) {
+    const uploadedProfileImage = await fileUpload.uploadIntoCloudinary(file);
+    req.body.admin.profilePhoto = uploadedProfileImage?.secure_url;
   }
 
-  const uploadedImage = await fileUpload.uploadIntoCloudinary(file);
-  const hashedPassword = await bcrypt.hash(data.password, 12);
-
-  const userData = {
-    email: data.admin.email,
-    password: hashedPassword,
-    role: UserRole.ADMIN,
-  };
-
-  const adminData = {
-    ...data.admin,
-    profilePhoto: uploadedImage?.secure_url,
-  };
-
+  const hashPassword = await hashedPassword(req.body.password);
   const result = await prisma.$transaction(async (transactionClient) => {
     await transactionClient.user.create({
-      data: userData,
+      data: {
+        email: req.body.admin.email,
+        password: hashPassword,
+        role: UserRole.ADMIN,
+      },
+    });
+    const newAdmin = await transactionClient.admin.create({
+      data: req.body.admin,
     });
 
-    const createdAdmin = await transactionClient.admin.create({
-      data: adminData,
+    return newAdmin;
+  });
+
+  return result;
+};
+
+const createDoctorIntoDB = async (req: Request) => {
+  const file = req.file;
+  if (file) {
+    const uploadedImage = await fileUpload.uploadIntoCloudinary(req.file);
+    req.body.doctor.profilePhoto = uploadedImage?.secure_url;
+  }
+
+  const passwordHashed = await hashedPassword(req.body.password);
+  const result = await prisma.$transaction(async (transactionClient) => {
+    await transactionClient.user.create({
+      data: {
+        email: req.body.doctor.email,
+        password: passwordHashed,
+        role: UserRole.DOCTORS,
+      },
     });
 
-    return createdAdmin;
+    const newDoctor = await transactionClient.doctor.create({
+      data: req.body.doctor,
+    });
+
+    return newDoctor;
   });
 
   return result;
@@ -50,4 +60,5 @@ const createAdminIntoDB = async (file: any, data: any) => {
 
 export const userServices = {
   createAdminIntoDB,
+  createDoctorIntoDB,
 };
