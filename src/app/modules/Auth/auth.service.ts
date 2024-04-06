@@ -25,6 +25,7 @@ const loginUser = async (payload: { email: string; password: string }) => {
   }
 
   const userInfo = {
+    id: userData.id,
     email: userData.email,
     role: userData.role,
   };
@@ -67,6 +68,7 @@ const refreshToken = async (token: string) => {
   });
 
   const userInfo = {
+    id: isUserExist.id,
     email: isUserExist.email,
     role: isUserExist.role,
   };
@@ -126,6 +128,7 @@ const forgotPassword = async (payload: { email: string }) => {
   });
 
   const userInfo = {
+    id: userData.id,
     email: userData.email,
     role: userData.role,
   };

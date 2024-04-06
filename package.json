@@ -19,13 +19,13 @@
     "@types/multer": "^1.4.11",
     "@types/node": "^20.11.30",
     "@types/nodemailer": "^6.4.14",
-    "prisma": "^5.11.0",
+    "prisma": "^5.12.1",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.4.3"
   },
   "dependencies": {
-    "@prisma/client": "^5.11.0",
+    "@prisma/client": "^5.12.1",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.1.0",
     "cookie-parser": "^1.4.6",

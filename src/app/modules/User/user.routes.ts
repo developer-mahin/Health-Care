@@ -4,8 +4,15 @@ import auth from "../../Middlewares/auth";
 import { fileUpload } from "../../Middlewares/fileUpload";
 import { userControllers } from "./user.controller";
 import { userValidation } from "./user.validation";
+import validateRequest from "../../Middlewares/validateRequest";
 
 const router = Router();
+
+router.get(
+  "/",
+  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+  userControllers.getAllFromDB
+);
 
 router.post(
   "/create-admin",
@@ -33,11 +40,30 @@ router.post(
 
 router.post(
   "/create-patient",
-
-  auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
   fileUpload.upload.single("file"),
 
-  (req: Request, res: Response, next: NextFunction) => {}
+  (req: Request, res: Response, next: NextFunction) => {
+    req.body = userValidation.createPatient.parse(JSON.parse(req.body.data));
+    return userControllers.createPatient(req, res, next);
+  }
+);
+
+router.patch(
+  "/:id/status",
+  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+  validateRequest(userValidation.updateStatus),
+  userControllers.updateMyProfile
+);
+
+router.get(
+  "/me",
+  auth(
+    UserRole.SUPER_ADMIN,
+    UserRole.ADMIN,
+    UserRole.DOCTORS,
+    UserRole.PATIENT
+  ),
+  userControllers.getMyProfile
 );
 
 export const userRoutes = router;

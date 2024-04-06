@@ -2,7 +2,7 @@ import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import path from "path";
 import fs from "fs";
-import { ICloudinaryResponse } from "../interface/file";
+import { ICloudinaryResponse, IFile } from "../interface/file";
 import config from "../config";
 
 cloudinary.config({
@@ -23,7 +23,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 const uploadIntoCloudinary = async (
-  file: any
+  file: IFile
 ): Promise<ICloudinaryResponse | undefined> => {
   return new Promise((resolve, reject) => {
     cloudinary.uploader.upload(

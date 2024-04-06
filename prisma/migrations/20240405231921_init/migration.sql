@@ -58,6 +58,21 @@ CREATE TABLE "doctors" (
     CONSTRAINT "doctors_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "patients" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "profilePhoto" TEXT,
+    "contactNumber" TEXT NOT NULL,
+    "address" TEXT,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "patients_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
@@ -67,8 +82,14 @@ CREATE UNIQUE INDEX "admins_email_key" ON "admins"("email");
 -- CreateIndex
 CREATE UNIQUE INDEX "doctors_email_key" ON "doctors"("email");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "patients_email_key" ON "patients"("email");
+
 -- AddForeignKey
 ALTER TABLE "admins" ADD CONSTRAINT "admins_email_fkey" FOREIGN KEY ("email") REFERENCES "users"("email") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "doctors" ADD CONSTRAINT "doctors_email_fkey" FOREIGN KEY ("email") REFERENCES "users"("email") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "patients" ADD CONSTRAINT "patients_email_fkey" FOREIGN KEY ("email") REFERENCES "users"("email") ON DELETE RESTRICT ON UPDATE CASCADE;
