@@ -48,13 +48,6 @@ router.post(
   }
 );
 
-router.patch(
-  "/:id/status",
-  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
-  validateRequest(userValidation.updateStatus),
-  userControllers.updateMyProfile
-);
-
 router.get(
   "/me",
   auth(
@@ -64,6 +57,21 @@ router.get(
     UserRole.PATIENT
   ),
   userControllers.getMyProfile
+);
+
+router.patch(
+  "/update-my-profile",
+  auth(
+    UserRole.SUPER_ADMIN,
+    UserRole.ADMIN,
+    UserRole.DOCTORS,
+    UserRole.PATIENT
+  ),
+  fileUpload.upload.single("file"),
+  (req: Request, res: Response, next: NextFunction) => {
+    req.body = JSON.parse(req.body.data);
+    return userControllers.updateMyProfile(req, res, next);
+  }
 );
 
 export const userRoutes = router;

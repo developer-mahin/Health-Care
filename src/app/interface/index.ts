@@ -1,4 +1,4 @@
-import { ENUM_USER_ROLE } from "../../enums";
+import { UserRole } from "@prisma/client";
 
 export type TTokenDecodedUser = {
   email: string;
@@ -10,7 +10,7 @@ export type TTokenDecodedUser = {
 export type TAuthUser = {
   id: string;
   email: string;
-  role: string;
+  role: UserRole;
   iat: number;
   exp: number;
 } | null;
