@@ -74,7 +74,9 @@ model Patient {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  user User @relation(fields: [email], references: [email])
+  user              User               @relation(fields: [email], references: [email])
+  patientHealthData PatientHealthData?
+  medicalReport     MedicalReport[]
 
   @@map("patients")
 }
@@ -90,12 +92,50 @@ model Specialties {
 
 model DoctorSpecialties {
   specialitiesId String
-  specities      Specialties @relation(fields: [specialitiesId], references: [id])
+  specialties    Specialties @relation(fields: [specialitiesId], references: [id])
   doctorId       String
   doctor         Doctor      @relation(fields: [doctorId], references: [id])
 
   @@id([specialitiesId, doctorId])
   @@map("doctorSpecialties")
+}
+
+model PatientHealthData {
+  id                  String        @id @default(uuid())
+  patientId           String        @unique
+  patient             Patient       @relation(fields: [patientId], references: [id])
+  dateOfBirth         DateTime
+  gender              Gender
+  bloodGroup          BloodGroup
+  hasAllergies        Boolean
+  hasDiabetes         Boolean
+  height              String
+  weight              String
+  smokingStatus       Boolean
+  dietaryPreferences  String
+  pregnancyStatus     Boolean
+  mentalHealthHistory String
+  immunizationStatus  String
+  hasPastSurgeries    Boolean
+  recentAnxiety       Boolean
+  recentDepression    Boolean
+  maritalStatus       MaritalStatus
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  @@map("patient_health_datas")
+}
+
+model MedicalReport {
+  id         String   @id @default(uuid())
+  patientId  String
+  patient    Patient  @relation(fields: [patientId], references: [id])
+  reportName String
+  reportLink String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("medical_report")
 }
 
 enum Gender {
@@ -114,4 +154,20 @@ enum UserRole {
   ADMIN
   DOCTORS
   PATIENT
+}
+
+enum MaritalStatus {
+  MARRIED
+  UNMARRIED
+}
+
+enum BloodGroup {
+  A_POSITIVE
+  B_POSITIVE
+  O_POSITIVE
+  AB_POSITIVE
+  A_NEGATIVE
+  B_NEGATIVE
+  O_NEGATIVE
+  AB_NEGATIVE
 }
