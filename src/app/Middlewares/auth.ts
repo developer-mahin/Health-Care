@@ -1,12 +1,12 @@
-import { NextFunction, Request, Response } from "express";
-import AppError from "../errors/AppError";
-import httpStatus from "http-status";
-import { verifyToken } from "../utils/verifyToken";
-import config from "../config";
-import { JwtPayload } from "jsonwebtoken";
-import prisma from "../utils/prisma";
-import catchAsync from "../utils/catchAsync";
 import { UserRole } from "@prisma/client";
+import { NextFunction, Request, Response } from "express";
+import httpStatus from "http-status";
+import { JwtPayload } from "jsonwebtoken";
+import config from "../config";
+import AppError from "../errors/AppError";
+import catchAsync from "../utils/catchAsync";
+import prisma from "../utils/prisma";
+import { verifyToken } from "../utils/verifyToken";
 
 const auth = (...roles: UserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -14,6 +14,7 @@ const auth = (...roles: UserRole[]) => {
     if (!token) {
       throw new AppError(httpStatus.UNAUTHORIZED, "Your are not authorized");
     }
+    console.log(token)
 
     const decoded = verifyToken(
       token,
@@ -29,7 +30,7 @@ const auth = (...roles: UserRole[]) => {
     });
 
     if (!user) {
-      throw new AppError(httpStatus.FORBIDDEN, "User not found");
+      throw new AppError(httpStatus.FORBIDDEN, "Forbidden access");
     }
 
     if (user.isDeleted) {

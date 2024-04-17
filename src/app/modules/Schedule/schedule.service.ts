@@ -1,7 +1,12 @@
 import { addHours, addMinutes, format } from "date-fns";
 import prisma from "../../utils/prisma";
+import { Prisma, Schedule } from "@prisma/client";
+import { TScheduleData } from "./schedule.interface";
+import calculatePagination from "../../utils/calculatePaginate";
 
-const createScheduleIntoDB = async (payload: any) => {
+const createScheduleIntoDB = async (
+  payload: TScheduleData
+): Promise<Schedule[] | null> => {
   const { startDate, endDate, startTime, endTime } = payload;
 
   const scheduleData = [];
@@ -11,16 +16,22 @@ const createScheduleIntoDB = async (payload: any) => {
 
   while (currentDate <= lastDate) {
     const startDateTime = new Date(
-      addHours(
-        `${format(currentDate, "yyyy-MM-dd")}`,
-        Number(startTime.split(":")[0])
+      addMinutes(
+        addHours(
+          `${format(currentDate, "yyyy-MM-dd")}`,
+          Number(startTime.split(":")[0])
+        ),
+        Number(startTime.split(":")[1])
       )
     );
 
     const endDateTime = new Date(
-      addHours(
-        `${format(currentDate, "yyyy-MM-dd")}`,
-        Number(endTime.split(":")[0])
+      addMinutes(
+        addHours(
+          `${format(currentDate, "yyyy-MM-dd")}`,
+          Number(endTime.split(":")[0])
+        ),
+        Number(endTime.split(":")[1])
       )
     );
 
@@ -30,11 +41,21 @@ const createScheduleIntoDB = async (payload: any) => {
         endDate: addMinutes(startDateTime, intervalTime),
       };
 
-      const result = await prisma.schedule.create({
-        data: schedule,
+      const isExistSchedule = await prisma.schedule.findFirst({
+        where: {
+          startDate: schedule.startDate,
+          endDate: schedule.endDate,
+        },
       });
 
-      scheduleData.push(result);
+      if (!isExistSchedule) {
+        const result = await prisma.schedule.create({
+          data: schedule,
+        });
+
+        scheduleData.push(result);
+      }
+
       startDateTime.setMinutes(startDateTime.getMinutes() + intervalTime);
     }
 
@@ -44,6 +65,93 @@ const createScheduleIntoDB = async (payload: any) => {
   return scheduleData;
 };
 
+const getAllScheduleFromDB = async (filters: any, options: any, user: any) => {
+  const { limit, page, skip } = calculatePagination(options);
+  const { startDate, endDate, ...filterData } = filters; // Extracting startDate and endDate from filters
+
+  const andConditions = [];
+
+  // Adding date filtering conditions if startDate and endDate are provided
+  if (startDate && endDate) {
+    andConditions.push({
+      AND: [
+        {
+          startDate: {
+            gte: startDate, // Greater than or equal to startDate
+          },
+        },
+        {
+          endDate: {
+            lte: endDate, // Less than or equal to endDate
+          },
+        },
+      ],
+    });
+  }
+
+  if (Object.keys(filterData).length > 0) {
+    andConditions.push({
+      AND: Object.keys(filterData).map((key) => {
+        return {
+          [key]: {
+            equals: (filterData as any)[key],
+          },
+        };
+      }),
+    });
+  }
+
+  const whereConditions: Prisma.ScheduleWhereInput =
+    andConditions.length > 0 ? { AND: andConditions } : {};
+
+  const doctorsSchedules = await prisma.doctorSchedules.findMany({
+    where: {
+      doctor: {
+        email: user.email,
+      },
+    },
+  });
+
+  const doctorScheduleIds = new Set(
+    doctorsSchedules.map((schedule) => schedule.scheduleId)
+  );
+
+  const result = await prisma.schedule.findMany({
+    where: {
+      ...whereConditions,
+      id: {
+        notIn: [...doctorScheduleIds],
+      },
+    },
+    skip,
+    take: limit,
+    orderBy:
+      options.sortBy && options.sortOrder
+        ? { [options.sortBy]: options.sortOrder }
+        : {
+            createdAt: "desc",
+          },
+  });
+  const total = await prisma.schedule.count({
+    where: {
+      ...whereConditions,
+      id: {
+        notIn: [...doctorScheduleIds],
+      },
+    },
+  });
+
+  return {
+    meta: {
+      total,
+      page,
+      limit,
+    },
+    data: result,
+  };
+};
+
 export const ScheduleService = {
   createScheduleIntoDB,
+  getAllScheduleFromDB,
 };
