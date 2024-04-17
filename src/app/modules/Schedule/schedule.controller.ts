@@ -6,6 +6,7 @@ import { ScheduleService } from "./schedule.service";
 import pick from "../../utils/pick";
 import { TAuthUser } from "../../interface";
 import { scheduleFilterableFields } from "./schedule.constant";
+import { IAuthUser } from "../../interface/common";
 
 const createSchedule = catchAsync(async (req: Request, res: Response) => {
   const result = await ScheduleService.createScheduleIntoDB(req.body);
@@ -26,7 +27,7 @@ const getAllFromDB = catchAsync(
     const result = await ScheduleService.getAllScheduleFromDB(
       filters,
       options,
-      user
+      user as IAuthUser
     );
     sendResponse(res, {
       status: httpStatus.OK,

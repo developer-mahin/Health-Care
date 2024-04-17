@@ -3,6 +3,7 @@ import prisma from "../../utils/prisma";
 import { Prisma, Schedule } from "@prisma/client";
 import { TScheduleData } from "./schedule.interface";
 import calculatePagination from "../../utils/calculatePaginate";
+import { IAuthUser } from "../../interface/common";
 
 const createScheduleIntoDB = async (
   payload: TScheduleData
@@ -65,29 +66,16 @@ const createScheduleIntoDB = async (
   return scheduleData;
 };
 
-const getAllScheduleFromDB = async (filters: any, options: any, user: any) => {
+const getAllScheduleFromDB = async (
+  filters: any,
+  options: any,
+  user: IAuthUser
+) => {
   const { limit, page, skip } = calculatePagination(options);
-  const { startDate, endDate, ...filterData } = filters; // Extracting startDate and endDate from filters
+  const { startDateTime, endDateTime, ...filterData } = filters; // Extracting startDate and endDate from filters
 
+  console.log(startDateTime, endDateTime);
   const andConditions = [];
-
-  // Adding date filtering conditions if startDate and endDate are provided
-  if (startDate && endDate) {
-    andConditions.push({
-      AND: [
-        {
-          startDate: {
-            gte: startDate, // Greater than or equal to startDate
-          },
-        },
-        {
-          endDate: {
-            lte: endDate, // Less than or equal to endDate
-          },
-        },
-      ],
-    });
-  }
 
   if (Object.keys(filterData).length > 0) {
     andConditions.push({
@@ -101,26 +89,43 @@ const getAllScheduleFromDB = async (filters: any, options: any, user: any) => {
     });
   }
 
-  const whereConditions: Prisma.ScheduleWhereInput =
-    andConditions.length > 0 ? { AND: andConditions } : {};
+  if (startDateTime && endDateTime) {
+    andConditions.push({
+      AND: [
+        {
+          startDate: {
+            gte: startDateTime,
+          },
+        },
+        {
+          endDate: {
+            lte: endDateTime,
+          },
+        },
+      ],
+    });
+  }
 
-  const doctorsSchedules = await prisma.doctorSchedules.findMany({
+  const doctorSchedules = await prisma.doctorSchedules.findMany({
     where: {
       doctor: {
-        email: user.email,
+        email: user?.email,
       },
     },
   });
 
-  const doctorScheduleIds = new Set(
-    doctorsSchedules.map((schedule) => schedule.scheduleId)
+  const doctorScheduleId = doctorSchedules.map(
+    (schedule) => schedule.scheduleId
   );
+
+  const whereConditions: Prisma.ScheduleWhereInput =
+    andConditions.length > 0 ? { AND: andConditions } : {};
 
   const result = await prisma.schedule.findMany({
     where: {
       ...whereConditions,
       id: {
-        notIn: [...doctorScheduleIds],
+        notIn: doctorScheduleId,
       },
     },
     skip,
@@ -136,7 +141,7 @@ const getAllScheduleFromDB = async (filters: any, options: any, user: any) => {
     where: {
       ...whereConditions,
       id: {
-        notIn: [...doctorScheduleIds],
+        notIn: doctorScheduleId,
       },
     },
   });

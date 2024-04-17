@@ -1,1 +1,4 @@
-export const scheduleFilterableFields: string[] = ["startDate", "endDate"];
+export const scheduleFilterableFields: string[] = [
+  "startDateTime",
+  "endDateTime",
+];

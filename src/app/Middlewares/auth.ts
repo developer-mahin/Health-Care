@@ -14,7 +14,6 @@ const auth = (...roles: UserRole[]) => {
     if (!token) {
       throw new AppError(httpStatus.UNAUTHORIZED, "Your are not authorized");
     }
-    console.log(token)
 
     const decoded = verifyToken(
       token,
