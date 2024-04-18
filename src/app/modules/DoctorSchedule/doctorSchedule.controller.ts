@@ -5,7 +5,6 @@ import { IAuthUser } from "../../interface/common";
 import catchAsync from "../../utils/catchAsync";
 import pick from "../../utils/pick";
 import { sendResponse } from "../../utils/sendResponse";
-import { scheduleFilterableFields } from "../Schedule/schedule.constant";
 import { DoctorScheduleService } from "./doctorSchedule.service";
 
 const createDoctorSchedule = catchAsync(
@@ -49,7 +48,25 @@ const getDoctorsSchedule = catchAsync(
   }
 );
 
+const deleteDoctorSchedule = catchAsync(
+  async (req: Request & { user?: TAuthUser }, res: Response) => {
+    const user = req.user;
+    const { id } = req.params;
+    await DoctorScheduleService.deleteDoctorScheduleFromDB(
+      user as TAuthUser,
+      id
+    );
+
+    sendResponse(res, {
+      status: httpStatus.OK,
+      success: true,
+      message: "Delete Doctor Schedule",
+    });
+  }
+);
+
 export const DoctorScheduleController = {
   createDoctorSchedule,
   getDoctorsSchedule,
+  deleteDoctorSchedule,
 };
