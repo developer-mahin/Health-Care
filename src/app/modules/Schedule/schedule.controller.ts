@@ -14,7 +14,7 @@ const createSchedule = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     status: httpStatus.OK,
     success: true,
-    message: "Patient updated successfully",
+    message: "Schedule Created Successful",
     data: result,
   });
 });

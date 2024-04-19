@@ -41,7 +41,12 @@ router.post(
 router.post(
   "/create-patient",
   fileUpload.upload.single("file"),
-
+  auth(
+    UserRole.ADMIN,
+    UserRole.SUPER_ADMIN,
+    UserRole.DOCTORS,
+    UserRole.PATIENT
+  ),
   (req: Request, res: Response, next: NextFunction) => {
     req.body = userValidation.createPatient.parse(JSON.parse(req.body.data));
     return userControllers.createPatient(req, res, next);
