@@ -266,7 +266,7 @@ const changeAppointmentStatus = async (
 };
 
 const cancelUnpaidAppointment = async () => {
-  const thirtyMinutesAgo = new Date(Date.now() - 1 * 60 * 1000);
+  const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
 
   const unpaidAppointmentData = await prisma.appointment.findMany({
     where: {

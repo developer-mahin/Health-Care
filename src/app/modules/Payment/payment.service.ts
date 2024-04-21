@@ -46,17 +46,17 @@ const initPayment = async (appointmentId: string) => {
 };
 
 const validatePayment = async (payload: any) => {
-  if (!payload && !payload.status && !(payload.status === "VALID")) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Payment Validation Error!!!");
-  }
+  // if (!payload && !payload.status && !(payload.status === "VALID")) {
+  //   throw new AppError(httpStatus.BAD_REQUEST, "Payment Validation Error!!!");
+  // }
 
-  const response = await sslService.validatePayment(payload);
+  // const response = await sslService.validatePayment(payload);
 
-  if (response.status !== "VALID") {
-    throw new AppError(httpStatus.BAD_REQUEST, "Payment Validation Error!");
-  }
+  // if (response.status !== "VALID") {
+  //   throw new AppError(httpStatus.BAD_REQUEST, "Payment Validation Error!");
+  // }
 
-  // const response = payload;
+  const response = payload;
 
   await prisma.$transaction(async (tx) => {
     const updatedPaymentData = await tx.payment.update({
