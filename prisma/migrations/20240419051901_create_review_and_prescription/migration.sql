@@ -1,21 +1,14 @@
 /*
   Warnings:
 
-  - You are about to drop the `Appointment` table. If the table is not empty, all the data it contains will be lost.
   - A unique constraint covering the columns `[appointmentId]` on the table `doctor_schedules` will be added. If there are existing duplicate values, this will fail.
 
 */
--- DropForeignKey
-ALTER TABLE "Appointment" DROP CONSTRAINT "Appointment_doctorId_fkey";
+-- CreateEnum
+CREATE TYPE "AppointmentStatus" AS ENUM ('SCHEDULED', 'INPROGRESS', 'COMPLETED', 'CANCELED');
 
--- DropForeignKey
-ALTER TABLE "Appointment" DROP CONSTRAINT "Appointment_patientId_fkey";
-
--- DropForeignKey
-ALTER TABLE "Appointment" DROP CONSTRAINT "Appointment_scheduleId_fkey";
-
--- DropTable
-DROP TABLE "Appointment";
+-- CreateEnum
+CREATE TYPE "PaymentStatus" AS ENUM ('PAID', 'UNPAID');
 
 -- CreateTable
 CREATE TABLE "appointments" (
@@ -46,11 +39,45 @@ CREATE TABLE "payments" (
     CONSTRAINT "payments_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "prescriptions" (
+    "id" TEXT NOT NULL,
+    "appointmentId" TEXT NOT NULL,
+    "doctorId" TEXT NOT NULL,
+    "patientId" TEXT NOT NULL,
+    "instructions" TEXT NOT NULL,
+    "followUpDate" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "prescriptions_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "reviews" (
+    "id" TEXT NOT NULL,
+    "patientId" TEXT NOT NULL,
+    "doctorId" TEXT NOT NULL,
+    "appointmentId" TEXT NOT NULL,
+    "rating" DOUBLE PRECISION NOT NULL,
+    "comment" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "reviews_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "appointments_scheduleId_key" ON "appointments"("scheduleId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "payments_appointmentId_key" ON "payments"("appointmentId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "prescriptions_appointmentId_key" ON "prescriptions"("appointmentId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "reviews_appointmentId_key" ON "reviews"("appointmentId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "doctor_schedules_appointmentId_key" ON "doctor_schedules"("appointmentId");
@@ -69,3 +96,21 @@ ALTER TABLE "appointments" ADD CONSTRAINT "appointments_scheduleId_fkey" FOREIGN
 
 -- AddForeignKey
 ALTER TABLE "payments" ADD CONSTRAINT "payments_appointmentId_fkey" FOREIGN KEY ("appointmentId") REFERENCES "appointments"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "prescriptions" ADD CONSTRAINT "prescriptions_appointmentId_fkey" FOREIGN KEY ("appointmentId") REFERENCES "appointments"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "prescriptions" ADD CONSTRAINT "prescriptions_doctorId_fkey" FOREIGN KEY ("doctorId") REFERENCES "doctors"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "prescriptions" ADD CONSTRAINT "prescriptions_patientId_fkey" FOREIGN KEY ("patientId") REFERENCES "patients"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "reviews" ADD CONSTRAINT "reviews_patientId_fkey" FOREIGN KEY ("patientId") REFERENCES "patients"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "reviews" ADD CONSTRAINT "reviews_doctorId_fkey" FOREIGN KEY ("doctorId") REFERENCES "doctors"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "reviews" ADD CONSTRAINT "reviews_appointmentId_fkey" FOREIGN KEY ("appointmentId") REFERENCES "appointments"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

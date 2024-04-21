@@ -8,6 +8,7 @@ import { PatientRoutes } from "../modules/PatientHealthData/patientHealthData.ro
 import { ScheduleRoutes } from "../modules/Schedule/schedule.routes";
 import { DoctorScheduleRoutes } from "../modules/DoctorSchedule/doctorSchedule.routes";
 import { AppointmentRoutes } from "../modules/Appointment/appointment.routes";
+import { PaymentRoutes } from "../modules/Payment/payment.routes";
 
 const router = Router();
 
@@ -47,6 +48,10 @@ const allRoutes = [
   {
     path: "/appointment",
     route: AppointmentRoutes,
+  },
+  {
+    path: "/payment",
+    route: PaymentRoutes,
   },
 ];
 
