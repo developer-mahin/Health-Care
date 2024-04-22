@@ -29,4 +29,10 @@ export default {
     ssl_payment_api: process.env.SSL_PAYMENT_API,
     ssl_validation_api: process.env.SSL_VALIDATION_API,
   },
+  super_admin: {
+    email: process.env.SUPER_EMAIL,
+    password: process.env.SUPER_PASSWORD,
+    name: process.env.SUPER_NAME,
+    contactNumber: process.env.SUPER_CONTACT,
+  },
 };
