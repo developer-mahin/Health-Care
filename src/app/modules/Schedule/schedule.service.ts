@@ -5,6 +5,11 @@ import { TScheduleData } from "./schedule.interface";
 import calculatePagination from "../../utils/calculatePaginate";
 import { IAuthUser } from "../../interface/common";
 
+const convertToUTC = async (date: Date) => {
+  const offset = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() + offset);
+};
+
 const createScheduleIntoDB = async (
   payload: TScheduleData
 ): Promise<Schedule[] | null> => {
@@ -37,21 +42,29 @@ const createScheduleIntoDB = async (
     );
 
     while (startDateTime < endDateTime) {
-      const schedule = {
-        startDate: startDateTime,
-        endDate: addMinutes(startDateTime, intervalTime),
+      // const schedule = {
+      //   startDate: startDateTime,
+      //   endDate: addMinutes(startDateTime, intervalTime),
+      // };
+
+      const s = await convertToUTC(startDateTime);
+      const e = await convertToUTC(addMinutes(startDateTime, intervalTime));
+
+      const schedulesData = {
+        startDate: s,
+        endDate: e,
       };
 
       const isExistSchedule = await prisma.schedule.findFirst({
         where: {
-          startDate: schedule.startDate,
-          endDate: schedule.endDate,
+          startDate: schedulesData.startDate,
+          endDate: schedulesData.endDate,
         },
       });
 
       if (!isExistSchedule) {
         const result = await prisma.schedule.create({
-          data: schedule,
+          data: schedulesData,
         });
 
         scheduleData.push(result);
