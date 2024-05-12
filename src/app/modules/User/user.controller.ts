@@ -64,6 +64,8 @@ const getMyProfile = catchAsync(
     const user = req.user;
     const result = await userServices.getMyProfileFromDB(user as TAuthUser);
 
+    console.log();
+
     sendResponse(res, {
       status: httpStatus.OK,
       success: true,

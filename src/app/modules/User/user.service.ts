@@ -213,6 +213,8 @@ const getMyProfileFromDB = async (user: TAuthUser) => {
     });
   }
 
+  console.log(profileInfo);
+
   return { ...userInfo, ...profileInfo };
 };
 

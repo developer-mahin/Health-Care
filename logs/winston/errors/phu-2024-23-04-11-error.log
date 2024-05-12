@@ -1,6 +1,0 @@
-Tue Apr 23 2024 11:30:57 } [PH] error: 🐱‍🏍 globalErrorHandler ~~ 
-Invalid `prisma.$queryRaw()` invocation:
-
-
-Raw query failed. Code: `42601`. Message: `ERROR: syntax error at or near "ASC"`
-Tue Apr 23 2024 11:37:50 } [PH] error: 🐱‍🏍 globalErrorHandler ~~ Do not know how to serialize a BigInt
