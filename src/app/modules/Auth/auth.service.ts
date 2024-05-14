@@ -4,7 +4,7 @@ import httpStatus from "http-status";
 import { JwtPayload } from "jsonwebtoken";
 import { default as Config, default as config } from "../../config";
 import AppError from "../../errors/AppError";
-import { TTokenDecodedUser } from "../../interface";
+import { TAuthUser, TTokenDecodedUser } from "../../interface";
 import { generateJsonWebToken } from "../../utils/generateJsonWebToken";
 import prisma from "../../utils/prisma";
 import sendMail from "../../utils/sendMail";
@@ -86,12 +86,12 @@ const refreshToken = async (token: string) => {
 };
 
 const changePassword = async (
-  user: TTokenDecodedUser,
+  user: TAuthUser,
   payload: { oldPassword: string; newPassword: string }
 ) => {
   const userData = await prisma.user.findUniqueOrThrow({
     where: {
-      email: user.email,
+      email: user?.email,
     },
   });
 
@@ -111,7 +111,7 @@ const changePassword = async (
 
   await prisma.user.update({
     where: {
-      email: user.email,
+      email: user?.email,
     },
     data: {
       password: hashPassword,

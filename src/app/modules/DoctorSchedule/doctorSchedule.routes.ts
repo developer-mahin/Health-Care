@@ -6,6 +6,12 @@ import { DoctorScheduleController } from "./doctorSchedule.controller";
 const router = Router();
 
 router.get(
+  "/",
+  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DOCTORS, UserRole.PATIENT),
+  DoctorScheduleController.getAllFromDB
+);
+
+router.get(
   "/my-schedule",
   auth(UserRole.DOCTORS),
   DoctorScheduleController.getDoctorsSchedule

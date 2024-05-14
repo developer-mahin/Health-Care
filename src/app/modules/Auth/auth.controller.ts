@@ -4,6 +4,8 @@ import { sendResponse } from "../../utils/sendResponse";
 import { AuthService } from "./auth.service";
 import Config from "../../config";
 import AppError from "../../errors/AppError";
+import { Request, Response } from "express";
+import { TAuthUser } from "../../interface";
 
 const loginUser = catchAsync(async (req, res) => {
   const { accessToken, needPasswordChange, refreshToken } =
@@ -38,16 +40,18 @@ const refreshToken = catchAsync(async (req, res) => {
   });
 });
 
-const changePassword = catchAsync(async (req, res) => {
-  const user = req.user;
-  await AuthService.changePassword(user, req.body);
+const changePassword = catchAsync(
+  async (req: Request & { user?: TAuthUser }, res: Response) => {
+    const user = req.user;
+    await AuthService.changePassword(user as TAuthUser, req.body);
 
-  sendResponse(res, {
-    status: httpStatus.OK,
-    success: true,
-    message: "Password change successfully",
-  });
-});
+    sendResponse(res, {
+      status: httpStatus.OK,
+      success: true,
+      message: "Password change successfully",
+    });
+  }
+);
 
 const forgotPassword = catchAsync(async (req, res) => {
   const result = await AuthService.forgotPassword(req.body);
