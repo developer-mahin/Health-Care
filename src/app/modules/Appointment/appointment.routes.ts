@@ -22,7 +22,7 @@ router.get(
 
 router.post(
   "/",
-  auth(UserRole.PATIENT),
+  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DOCTORS),
   validateRequest(AppointmentValidation.createAppointment),
   AppointmentControllers.createAppointment
 );

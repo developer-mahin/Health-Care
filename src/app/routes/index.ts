@@ -31,7 +31,7 @@ const allRoutes = [
     route: SpecialtiesRoutes,
   },
   {
-    path: "/doctor",
+    path: "/doctors",
     route: DoctorRoutes,
   },
   {

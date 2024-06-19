@@ -191,8 +191,9 @@ const resetPassword = async (
   }
 
   const hashPassword = await bcrypt.hash(payload.password, 10);
+  console.log(hashPassword)
 
-  await prisma.user.update({
+  const result = await prisma.user.update({
     where: {
       email: payload.email,
     },
@@ -201,6 +202,8 @@ const resetPassword = async (
       needPasswordChange: false,
     },
   });
+
+  console.log(result);
 };
 
 export const AuthService = {

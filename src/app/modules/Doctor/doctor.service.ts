@@ -3,9 +3,14 @@ import { TGenericResponse } from "../../interface/common";
 import calculatePagination from "../../utils/calculatePaginate";
 import prisma from "../../utils/prisma";
 import { doctorSearchableFields } from "./doctor.constant";
-import { TDoctorFilterRequest, TDoctorUpdate } from "./doctor.interface";
+import {
+  TDoctorFilterRequest,
+  TDoctorUpdate,
+  TSpecialties,
+} from "./doctor.interface";
 import httpStatus from "http-status";
 import AppError from "../../errors/AppError";
+import { asyncForEach } from "../../utils/asyncForEach";
 
 const getAllFromDB = async (
   filters: TDoctorFilterRequest,
@@ -128,30 +133,70 @@ const updateIntoDB = async (id: string, payload: Partial<TDoctorUpdate>) => {
     });
 
     if (specialties && specialties?.length > 0) {
-      const deletedSpecialtyId = specialties.filter(
+      const deleteSpecialities = specialties.filter(
         (specialty) => specialty.isDeleted
       );
 
-      for (const id of deletedSpecialtyId) {
-        await transactionClient.doctorSpecialties.deleteMany({
-          where: {
-            doctorId: user.id,
-            specialitiesId: id.specialitiesId,
-          },
-        });
-      }
+      // for (const id of deletedSpecialtyId) {
+      //   await transactionClient.doctorSpecialties.deleteMany({
+      //     where: {
+      //       doctorId: user.id,
+      //       specialitiesId: id.specialitiesId,
+      //     },
+      //   });
+      // }
 
-      const createSpecialtyId = specialties.filter(
+      const newSpecialities = specialties.filter(
         (specialty) => !specialty.isDeleted
       );
-      for (const id of createSpecialtyId) {
-        await transactionClient.doctorSpecialties.create({
-          data: {
-            specialitiesId: id.specialitiesId,
-            doctorId: user.id,
-          },
-        });
-      }
+
+      await asyncForEach(
+        deleteSpecialities,
+        async (deleteDoctorSpeciality: TSpecialties) => {
+          await transactionClient.doctorSpecialties.deleteMany({
+            where: {
+              AND: [
+                {
+                  doctorId: id,
+                },
+                {
+                  specialitiesId: deleteDoctorSpeciality.specialitiesId,
+                },
+              ],
+            },
+          });
+        }
+      );
+
+      await asyncForEach(
+        newSpecialities,
+        async (insertDoctorSpecialties: TSpecialties) => {
+          const existingSpecialties = await prisma.doctorSpecialties.findFirst({
+            where: {
+              specialitiesId: insertDoctorSpecialties.specialitiesId,
+              doctorId: id,
+            },
+          });
+
+          if (!existingSpecialties) {
+            await transactionClient.doctorSpecialties.create({
+              data: {
+                doctorId: id,
+                specialitiesId: insertDoctorSpecialties.specialitiesId,
+              },
+            });
+          }
+        }
+      );
+
+      // for (const id of createSpecialtyId) {
+      //   await transactionClient.doctorSpecialties.create({
+      //     data: {
+      //       specialitiesId: id.specialitiesId,
+      //       doctorId: user.id,
+      //     },
+      //   });
+      // }
     }
   });
 
@@ -160,7 +205,11 @@ const updateIntoDB = async (id: string, payload: Partial<TDoctorUpdate>) => {
       id: user.id,
     },
     include: {
-      doctorSpecialties: true,
+      doctorSpecialties: {
+        include: {
+          specialties: true,
+        },
+      },
     },
   });
 
